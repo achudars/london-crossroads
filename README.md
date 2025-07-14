@@ -2,6 +2,8 @@
 
 A modern, interactive full-screen map showing the Elizabeth Line (Crossrail) in London, built with Next.js and React-Leaflet.
 
+![London Crossroads Map Preview](london-crossroads.png)
+
 ## Features
 
 - 🗺️ **Full-screen interactive map** with zoom and pan controls
