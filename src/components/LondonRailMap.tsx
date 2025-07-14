@@ -94,31 +94,28 @@ const LondonRailMap: React.FC = () => {
     const [isClient, setIsClient] = useState(false);
     const [mapReady, setMapReady] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
-    const componentIdRef = useRef(`map-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`); useEffect(() => {
+    const mapKeyRef = useRef(Date.now());
+    const initializationRef = useRef(false);
+
+    useEffect(() => {
+        // Prevent double initialization in React Strict Mode
+        if (initializationRef.current) return;
+        initializationRef.current = true;
+
         setIsClient(true);
 
         // Small delay to ensure DOM is ready
         const timer = setTimeout(() => {
             setMapReady(true);
-        }, 50);
+        }, 300);
 
         // Cleanup function
         return () => {
             clearTimeout(timer);
-            // Capture the ref value at cleanup time
-            const container = containerRef.current;
-            if (container) {
-                // Force cleanup of any Leaflet instances
-                const mapElement = container.querySelector('.leaflet-container') as HTMLElement & { _leaflet_id?: number };
-                if (mapElement && mapElement._leaflet_id) {
-                    try {
-                        // Remove Leaflet's internal references
-                        delete mapElement._leaflet_id;
-                    } catch {
-                        // Ignore cleanup errors
-                    }
-                }
-            }
+            setMapReady(false);
+            // Generate new key for next mount
+            mapKeyRef.current = Date.now();
+            initializationRef.current = false;
         };
     }, []);
 
@@ -164,7 +161,7 @@ const LondonRailMap: React.FC = () => {
     return (
         <div ref={containerRef} style={{ height: '100vh', width: '100vw', position: 'relative' }}>
             <MapContainer
-                key={componentIdRef.current}
+                key={`london-map-${mapKeyRef.current}`}
                 center={[51.5074, -0.1278]}
                 zoom={10}
                 style={{ height: '100%', width: '100%' }}
