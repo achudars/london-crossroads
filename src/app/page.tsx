@@ -8,7 +8,13 @@ const LondonRailMap = dynamic(
     {
         ssr: false,
         loading: () => (
-            <div className="map-loading">
+            <div className="map-loading" style={{ 
+                display: 'flex', 
+                justifyContent: 'center', 
+                alignItems: 'center', 
+                height: '100vh',
+                fontSize: '18px'
+            }}>
                 Loading London Rail Map...
             </div>
         )
@@ -16,5 +22,9 @@ const LondonRailMap = dynamic(
 );
 
 export default function Home() {
-    return <LondonRailMap />;
+    return (
+        <div style={{ height: '100vh', width: '100vw' }}>
+            <LondonRailMap />
+        </div>
+    );
 }
