@@ -1,4 +1,4 @@
-# London Rail Network Map - Next.js
+# London Rail Network Map - Elizabeth and Thameslink with 1-mile radiuses of each station
 
 A modern, interactive full-screen map showing London's rail network including the Elizabeth Line (Crossrail) and Thameslink routes, built with Next.js and React-Leaflet.
 
