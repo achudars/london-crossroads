@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, Circle, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { elizabethLineStations } from '@/data/elizabeth-line-stations';
 import { Station } from '@/types/elizabeth-line';
@@ -129,6 +129,22 @@ const ElizabethLineMap: React.FC = () => {
                     }}
                 />
 
+                {/* 1-mile radius circles around each station */}
+                {elizabethLineStations.map((station) => (
+                    <Circle
+                        key={`circle-${station.id}`}
+                        center={[station.lat, station.lng]}
+                        radius={1609} // 1 mile in meters
+                        pathOptions={{
+                            color: '#FF69B4',
+                            weight: 2,
+                            opacity: 0.6,
+                            fillColor: '#FF69B4',
+                            fillOpacity: 0.1,
+                        }}
+                    />
+                ))}
+
                 {/* Station markers */}
                 {elizabethLineStations.map((station) => (
                     <Marker
@@ -191,6 +207,18 @@ const ElizabethLineMap: React.FC = () => {
                             marginRight: '6px'
                         }}></div>
                         Interchange Station
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', margin: '3px 0' }}>
+                        <div style={{
+                            width: '12px',
+                            height: '12px',
+                            backgroundColor: '#FF69B4',
+                            borderRadius: '50%',
+                            border: '2px solid #FF69B4',
+                            opacity: '0.6',
+                            marginRight: '8px'
+                        }}></div>
+                        1-mile radius
                     </div>
                 </div>
             </div>
