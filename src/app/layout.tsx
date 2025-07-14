@@ -13,7 +13,7 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
-            <body className="map-body">
+            <body className="map-body" suppressHydrationWarning={true}>
                 {children}
             </body>
         </html>
