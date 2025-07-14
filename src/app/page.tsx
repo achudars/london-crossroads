@@ -8,10 +8,10 @@ const LondonRailMap = dynamic(
     {
         ssr: false,
         loading: () => (
-            <div className="map-loading" style={{ 
-                display: 'flex', 
-                justifyContent: 'center', 
-                alignItems: 'center', 
+            <div className="map-loading" style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
                 height: '100vh',
                 fontSize: '18px'
             }}>

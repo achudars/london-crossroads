@@ -94,9 +94,7 @@ const LondonRailMap: React.FC = () => {
     const [isClient, setIsClient] = useState(false);
     const [mapReady, setMapReady] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
-    const componentIdRef = useRef(`map-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`);
-
-    useEffect(() => {
+    const componentIdRef = useRef(`map-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`);    useEffect(() => {
         setIsClient(true);
         
         // Small delay to ensure DOM is ready
@@ -107,14 +105,16 @@ const LondonRailMap: React.FC = () => {
         // Cleanup function
         return () => {
             clearTimeout(timer);
-            if (containerRef.current) {
+            // Capture the ref value at cleanup time
+            const container = containerRef.current;
+            if (container) {
                 // Force cleanup of any Leaflet instances
-                const mapElement = containerRef.current.querySelector('.leaflet-container');
-                if (mapElement && (mapElement as any)._leaflet_id) {
+                const mapElement = container.querySelector('.leaflet-container') as HTMLElement & { _leaflet_id?: number };
+                if (mapElement && mapElement._leaflet_id) {
                     try {
                         // Remove Leaflet's internal references
-                        delete (mapElement as any)._leaflet_id;
-                    } catch (e) {
+                        delete mapElement._leaflet_id;
+                    } catch {
                         // Ignore cleanup errors
                     }
                 }
