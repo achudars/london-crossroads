@@ -1,8 +1,19 @@
-# London Rail Network Map - Elizabeth and Thameslink with 1-mile radiuses of each station
+# London Rail Network Map - Multi-Line Interactive Visualization
 
-A modern, interactive full-screen map showing London's rail network including the Elizabeth Line (Crossrail) and Thameslink routes, built with Next.js and React-Leaflet.
+A modern, interactive full-screen map visualizing London's rail network crossroads, featuring the Elizabeth Line (Crossrail) and Thameslink routes with 1-mile coverage radiuses around each station. Built with Next.js and React-Leaflet.
 
 ![London Crossroads Map Preview](london-crossroads.png)
+
+## About This App
+
+This application visualizes the intersection and coverage areas of London's major rail networks, specifically focusing on how different rail lines create transportation crossroads throughout the city. The app displays:
+
+- **Multi-line rail network visualization** showing how different rail systems intersect
+- **Coverage analysis** with 1-mile radius circles around each station
+- **Interactive exploration** of London's rail infrastructure
+- **Comprehensive station data** including zones and interchange connections
+
+The focus is on understanding London's rail crossroads - where different transportation networks meet and overlap, making it easier to understand connectivity and coverage gaps across the city.
 
 ## Features
 
@@ -18,11 +29,22 @@ A modern, interactive full-screen map showing London's rail network including th
 
 ## Technologies Used
 
-- **Next.js 14** - React framework with App Router
-- **TypeScript** - Type safety
-- **React-Leaflet** - React components for Leaflet maps
-- **Leaflet** - Interactive maps library
+- **Next.js 15.3.5** - React framework with App Router (latest stable)
+- **React 18.3.1** - Latest stable React version
+- **TypeScript 5.1.6** - Type safety and modern JavaScript features
+- **React-Leaflet 4.2.1** - React components for Leaflet maps
+- **Leaflet 1.9.4** - Interactive maps library
 - **OpenStreetMap** - Map tiles
+- **ESLint 9.31.0** - Code linting and quality
+- **Lucide React 0.263.1** - Modern icon library
+
+## Development Dependencies
+
+- **@types/leaflet 1.9.4** - TypeScript definitions for Leaflet
+- **@types/node 20.5.0** - Node.js TypeScript definitions
+- **@types/react 18.3.23** - React TypeScript definitions
+- **@types/react-dom 18.3.7** - React DOM TypeScript definitions
+- **eslint-config-next 15.3.5** - Next.js ESLint configuration
 
 ## Getting Started
 
@@ -47,15 +69,15 @@ npm run dev
 src/
 ├── app/
 │   ├── layout.tsx          # Root layout
-│   ├── page.tsx            # Home page
+│   ├── page.tsx            # Home page with dynamic map import
 │   └── globals.css         # Global styles
 ├── components/
-│   └── ElizabethLineMap.tsx # Main map component
+│   └── LondonRailMap.tsx   # Main interactive map component
 ├── data/
 │   ├── elizabeth-line-stations.ts # Elizabeth Line station data
 │   └── thameslink-stations.ts     # Thameslink station data
 └── types/
-    └── elizabeth-line.ts   # TypeScript interfaces
+    └── elizabeth-line.ts   # TypeScript interfaces for stations
 ```
 
 ## Station Data
@@ -104,27 +126,27 @@ npm start
 - **Elizabeth Line**: Continuous purple line (#663399) connecting all stations
 - **Thameslink**: Continuous teal line (#008B8B) from Rainham to Bedford
 - Both follow actual route geography with smooth curves
-- 5px thick lines with rounded ends for clarity
+- Weighted lines (6px Elizabeth, 5px Thameslink) with rounded ends for clarity
 
 ### Coverage Visualization
 
 - **1-mile radius circles** around each station showing coverage area
-- Pink circles for Elizabeth Line stations
-- Light teal circles for Thameslink stations
-- Semi-transparent overlay (8% opacity) for subtle visualization
+- Pink circles (opacity 8%) for Elizabeth Line stations
+- Light teal circles (opacity 8%) for Thameslink stations
+- Visual analysis of network overlap and coverage gaps
 
 ### Information Panel
 
-- Fixed overlay showing network statistics
+- Fixed overlay showing comprehensive network statistics
 - Combined Elizabeth Line and Thameslink data
-- Legend explaining all marker types and colors
-- Key facts about both rail lines
+- Interactive legend explaining all marker types and colors
+- Key facts about both rail lines and their intersections
 
 ## Customization
 
 ### Changing Colors
 
-Edit the colors in `src/components/ElizabethLineMap.tsx`:
+Edit the colors in `src/components/LondonRailMap.tsx`:
 
 - Elizabeth Line: Purple (`#663399`)
 - Thameslink: Teal (`#008B8B`)
@@ -133,7 +155,7 @@ Edit the colors in `src/components/ElizabethLineMap.tsx`:
 ### Adding More Lines
 
 1. Create new station data file in `src/data/`
-2. Import stations in `ElizabethLineMap.tsx`
+2. Import stations in `LondonRailMap.tsx`
 3. Add line configuration with colors and styling
 4. Update legend and information panel
 5. Extend the `Station` interface in `src/types/elizabeth-line.ts` if needed

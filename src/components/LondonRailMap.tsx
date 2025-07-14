@@ -92,7 +92,7 @@ const StationPopup: React.FC<StationPopupProps> = ({ station }) => (
     </div>
 );
 
-const ElizabethLineMap: React.FC = () => {
+const LondonRailMap: React.FC = () => {
     const [isClient, setIsClient] = useState(false);
 
     useEffect(() => {
@@ -141,6 +141,7 @@ const ElizabethLineMap: React.FC = () => {
     return (
         <div style={{ height: '100vh', width: '100vw', position: 'relative' }}>
             <MapContainer
+                key="london-crossroads-map"
                 center={[51.5074, -0.1278]}
                 zoom={10}
                 style={{ height: '100%', width: '100%' }}
@@ -326,4 +327,4 @@ const ElizabethLineMap: React.FC = () => {
     );
 };
 
-export default ElizabethLineMap;
+export default LondonRailMap;
