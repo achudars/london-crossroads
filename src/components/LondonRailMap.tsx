@@ -94,9 +94,9 @@ const LondonRailMap: React.FC = () => {
     const [isClient, setIsClient] = useState(false);
     const [mapReady, setMapReady] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
-    const componentIdRef = useRef(`map-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`);    useEffect(() => {
+    const componentIdRef = useRef(`map-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`); useEffect(() => {
         setIsClient(true);
-        
+
         // Small delay to ensure DOM is ready
         const timer = setTimeout(() => {
             setMapReady(true);
