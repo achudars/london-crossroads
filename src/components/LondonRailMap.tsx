@@ -1,6 +1,4 @@
-'use client';
-
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, Circle, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { elizabethLineStations } from '@/data/elizabeth-line-stations';
@@ -94,15 +92,25 @@ const StationPopup: React.FC<StationPopupProps> = ({ station }) => (
 
 const LondonRailMap: React.FC = () => {
     const [isClient, setIsClient] = useState(false);
+    const [mapKey, setMapKey] = useState(0);
 
     useEffect(() => {
         setIsClient(true);
+        // Force a new map instance on every mount to prevent conflicts
+        setMapKey(Date.now());
+    }, []);
+
+    // Force remount on hot reload in development
+    useEffect(() => {
+        if (process.env.NODE_ENV === 'development') {
+            setMapKey(Date.now());
+        }
     }, []);
 
     if (!isClient) {
         return (
             <div className="map-loading">
-                <div>Loading Elizabeth Line Map...</div>
+                <div>Loading London Rail Map...</div>
             </div>
         );
     }
@@ -141,7 +149,7 @@ const LondonRailMap: React.FC = () => {
     return (
         <div style={{ height: '100vh', width: '100vw', position: 'relative' }}>
             <MapContainer
-                key="london-crossroads-map"
+                key={`london-crossroads-map-${mapKey}`}
                 center={[51.5074, -0.1278]}
                 zoom={10}
                 style={{ height: '100%', width: '100%' }}
