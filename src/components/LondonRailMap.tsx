@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, Circle, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { elizabethLineStations } from '@/data/elizabeth-line-stations';
@@ -92,19 +92,37 @@ const StationPopup: React.FC<StationPopupProps> = ({ station }) => (
 
 const LondonRailMap: React.FC = () => {
     const [isClient, setIsClient] = useState(false);
-    const [mapKey, setMapKey] = useState('initial');
+    const [mapReady, setMapReady] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const componentIdRef = useRef(`map-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`);
 
     useEffect(() => {
         setIsClient(true);
-        // Use a stable key for production, random for development
-        if (process.env.NODE_ENV === 'development') {
-            setMapKey(`dev-${Math.random()}`);
-        } else {
-            setMapKey('london-crossroads-map');
-        }
+        
+        // Small delay to ensure DOM is ready
+        const timer = setTimeout(() => {
+            setMapReady(true);
+        }, 50);
+
+        // Cleanup function
+        return () => {
+            clearTimeout(timer);
+            if (containerRef.current) {
+                // Force cleanup of any Leaflet instances
+                const mapElement = containerRef.current.querySelector('.leaflet-container');
+                if (mapElement && (mapElement as any)._leaflet_id) {
+                    try {
+                        // Remove Leaflet's internal references
+                        delete (mapElement as any)._leaflet_id;
+                    } catch (e) {
+                        // Ignore cleanup errors
+                    }
+                }
+            }
+        };
     }, []);
 
-    if (!isClient) {
+    if (!isClient || !mapReady) {
         return (
             <div className="map-loading">
                 <div>Loading London Rail Map...</div>
@@ -144,9 +162,9 @@ const LondonRailMap: React.FC = () => {
     const thameslinkCoordinates = createThameslinkLineSegments();
 
     return (
-        <div style={{ height: '100vh', width: '100vw', position: 'relative' }}>
+        <div ref={containerRef} style={{ height: '100vh', width: '100vw', position: 'relative' }}>
             <MapContainer
-                key={mapKey}
+                key={componentIdRef.current}
                 center={[51.5074, -0.1278]}
                 zoom={10}
                 style={{ height: '100%', width: '100%' }}
