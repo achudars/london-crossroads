@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, Circle, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { elizabethLineStations } from '@/data/elizabeth-line-stations';
+import { thameslinkStations } from '@/data/thameslink-stations';
 import { Station } from '@/types/elizabeth-line';
 import 'leaflet/dist/leaflet.css';
 
@@ -35,13 +36,34 @@ const createElizabethIcon = (isInterchange: boolean = false) => {
     });
 };
 
+// Thameslink branded station icon
+const createThameslinkIcon = (isInterchange: boolean = false) => {
+    return L.divIcon({
+        className: 'thameslink-station-marker',
+        html: `
+      <div style="
+        width: ${isInterchange ? '16px' : '12px'};
+        height: ${isInterchange ? '16px' : '12px'};
+        background-color: #008B8B;
+        border: 2px solid white;
+        border-radius: 50%;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        ${isInterchange ? 'border-width: 3px;' : ''}
+      "></div>
+    `,
+        iconSize: [isInterchange ? 16 : 12, isInterchange ? 16 : 12],
+        iconAnchor: [isInterchange ? 8 : 6, isInterchange ? 8 : 6],
+    });
+};
+
 // Component to fit bounds to all stations
 const FitBounds: React.FC = () => {
     const map = useMap();
 
     useEffect(() => {
+        const allStations = [...elizabethLineStations, ...thameslinkStations];
         const bounds = L.latLngBounds(
-            elizabethLineStations.map(station => [station.lat, station.lng])
+            allStations.map(station => [station.lat, station.lng])
         );
         map.fitBounds(bounds, { padding: [20, 20] });
     }, [map]);
@@ -99,7 +121,22 @@ const ElizabethLineMap: React.FC = () => {
         return segments;
     };
 
+    // Create Thameslink line segments from south to north
+    const createThameslinkLineSegments = () => {
+        const segments: [number, number][] = [];
+
+        // Sort Thameslink stations from south to north (by latitude)
+        const southToNorth = [...thameslinkStations].sort((a, b) => a.lat - b.lat);
+
+        southToNorth.forEach(station => {
+            segments.push([station.lat, station.lng]);
+        });
+
+        return segments;
+    };
+
     const lineCoordinates = createLineSegments();
+    const thameslinkCoordinates = createThameslinkLineSegments();
 
     return (
         <div style={{ height: '100vh', width: '100vw', position: 'relative' }}>
@@ -129,7 +166,19 @@ const ElizabethLineMap: React.FC = () => {
                     }}
                 />
 
-                {/* 1-mile radius circles around each station */}
+                {/* Thameslink route */}
+                <Polyline
+                    positions={thameslinkCoordinates}
+                    pathOptions={{
+                        color: '#008B8B',
+                        weight: 5,
+                        opacity: 0.8,
+                        lineCap: 'round',
+                        lineJoin: 'round',
+                    }}
+                />
+
+                {/* 1-mile radius circles around each Elizabeth Line station */}
                 {elizabethLineStations.map((station) => (
                     <Circle
                         key={`circle-${station.id}`}
@@ -145,12 +194,41 @@ const ElizabethLineMap: React.FC = () => {
                     />
                 ))}
 
-                {/* Station markers */}
+                {/* 1-mile radius circles around each Thameslink station */}
+                {thameslinkStations.map((station) => (
+                    <Circle
+                        key={`circle-tl-${station.id}`}
+                        center={[station.lat, station.lng]}
+                        radius={1609} // 1 mile in meters
+                        pathOptions={{
+                            color: '#40E0D0',
+                            weight: 2,
+                            opacity: 0.5,
+                            fillColor: '#40E0D0',
+                            fillOpacity: 0.08,
+                        }}
+                    />
+                ))}
+
+                {/* Elizabeth Line station markers */}
                 {elizabethLineStations.map((station) => (
                     <Marker
                         key={station.id}
                         position={[station.lat, station.lng]}
                         icon={createElizabethIcon(!!station.interchanges?.length)}
+                    >
+                        <Popup maxWidth={300} closeButton={true}>
+                            <StationPopup station={station} />
+                        </Popup>
+                    </Marker>
+                ))}
+
+                {/* Thameslink station markers */}
+                {thameslinkStations.map((station) => (
+                    <Marker
+                        key={`tl-${station.id}`}
+                        position={[station.lat, station.lng]}
+                        icon={createThameslinkIcon(!!station.interchanges?.length)}
                     >
                         <Popup maxWidth={300} closeButton={true}>
                             <StationPopup station={station} />
@@ -174,16 +252,16 @@ const ElizabethLineMap: React.FC = () => {
                 maxWidth: '300px',
             }}>
                 <h2 style={{ color: '#663399', margin: '0 0 10px 0', fontSize: '18px' }}>
-                    Elizabeth Line
+                    London Rail Network
                 </h2>
                 <p style={{ margin: '5px 0', fontSize: '14px' }}>
-                    <strong>Stations:</strong> {elizabethLineStations.length}
+                    <strong>Elizabeth Line:</strong> {elizabethLineStations.length} stations
                 </p>
                 <p style={{ margin: '5px 0', fontSize: '14px' }}>
-                    <strong>Length:</strong> 118 km (73 miles)
+                    <strong>Thameslink:</strong> {thameslinkStations.length} stations
                 </p>
                 <p style={{ margin: '5px 0', fontSize: '14px' }}>
-                    <strong>Opened:</strong> May 24, 2022
+                    <strong>Elizabeth Line Opened:</strong> May 24, 2022
                 </p>
                 <div style={{ marginTop: '10px', fontSize: '12px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', margin: '3px 0' }}>
@@ -219,6 +297,28 @@ const ElizabethLineMap: React.FC = () => {
                             marginRight: '8px'
                         }}></div>
                         1-mile radius
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', margin: '3px 0' }}>
+                        <div style={{
+                            width: '12px',
+                            height: '12px',
+                            backgroundColor: '#008B8B',
+                            borderRadius: '50%',
+                            border: '2px solid white',
+                            marginRight: '8px'
+                        }}></div>
+                        Thameslink Station
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', margin: '3px 0' }}>
+                        <div style={{
+                            width: '16px',
+                            height: '16px',
+                            backgroundColor: '#008B8B',
+                            borderRadius: '50%',
+                            border: '3px solid white',
+                            marginRight: '6px'
+                        }}></div>
+                        Thameslink Interchange
                     </div>
                 </div>
             </div>
