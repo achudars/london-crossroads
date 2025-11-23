@@ -134,23 +134,22 @@ const LondonRailMap: React.FC = () => {
         // Sort stations by approximate geographical flow
         const westToEast = [...elizabethLineStations].sort((a, b) => a.lng - b.lng);
 
-        westToEast.forEach(station => {
+        for (const station of westToEast) {
             segments.push([station.lat, station.lng]);
-        });
+        }
 
         return segments;
     };
 
-    // Create Thameslink line segments from south to north
+    // Create Thameslink line segments following the route order
     const createThameslinkLineSegments = () => {
         const segments: [number, number][] = [];
 
-        // Sort Thameslink stations from south to north (by latitude)
-        const southToNorth = [...thameslinkStations].sort((a, b) => a.lat - b.lat);
-
-        southToNorth.forEach(station => {
+        // Use the order defined in the data file which represents the route structure
+        // Sorting by latitude caused issues with branches (e.g. connecting Cricklewood to East London stations)
+        for (const station of thameslinkStations) {
             segments.push([station.lat, station.lng]);
-        });
+        }
 
         return segments;
     };
