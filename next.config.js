@@ -5,6 +5,7 @@ const nextConfig = {
     config.externals = [...config.externals, { canvas: "canvas" }];
     return config;
   },
+  turbopack: {},
 };
 
 module.exports = nextConfig;
