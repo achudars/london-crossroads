@@ -127,35 +127,69 @@ const LondonRailMap: React.FC = () => {
         );
     }
 
-    // Create line segments for smoother curves
-    const createLineSegments = () => {
-        const segments: [number, number][] = [];
+    // Elizabeth Line: two explicit branches sharing the central spine
+    const createElizabethLineSegments = () => {
+        const byId = new Map(elizabethLineStations.map(s => [s.id, [s.lat, s.lng] as [number, number]]));
 
-        // Sort stations by approximate geographical flow
-        const westToEast = [...elizabethLineStations].sort((a, b) => a.lng - b.lng);
+        // Reading → … → Whitechapel → Stratford → … → Shenfield (main line)
+        const mainLine: [number, number][] = [
+            'reading', 'twyford', 'maidenhead', 'taplow', 'burnham', 'slough',
+            'langley', 'iver', 'west-drayton', 'hayes-harlington', 'southall',
+            'hanwell', 'west-ealing', 'ealing-broadway', 'acton-main-line',
+            'paddington', 'bond-street', 'tottenham-court-road', 'farringdon',
+            'liverpool-street', 'whitechapel', 'stratford', 'maryland',
+            'forest-gate', 'manor-park', 'ilford', 'seven-kings', 'goodmayes',
+            'chadwell-heath', 'romford', 'gidea-park', 'harold-wood',
+            'brentwood', 'shenfield',
+        ].map(id => byId.get(id)!);
 
-        for (const station of westToEast) {
-            segments.push([station.lat, station.lng]);
-        }
+        // Whitechapel → Canary Wharf → … → Abbey Wood (southern branch)
+        const abbeyWoodBranch: [number, number][] = [
+            'whitechapel', 'canary-wharf', 'custom-house', 'woolwich', 'abbey-wood',
+        ].map(id => byId.get(id)!);
 
-        return segments;
+        return { mainLine, abbeyWoodBranch };
     };
 
-    // Create Thameslink line segments following the route order
+    // Thameslink north-south + c2c eastern branches, each in correct route order
     const createThameslinkLineSegments = () => {
-        const segments: [number, number][] = [];
+        const byId = new Map(thameslinkStations.map(s => [s.id, [s.lat, s.lng] as [number, number]]));
 
-        // Use the order defined in the data file which represents the route structure
-        // Sorting by latitude caused issues with branches (e.g. connecting Cricklewood to East London stations)
-        for (const station of thameslinkStations) {
-            segments.push([station.lat, station.lng]);
-        }
+        // Bedford → London Bridge (Thameslink north-south spine)
+        const northSouth: [number, number][] = [
+            'bedford', 'flitwick', 'harlington', 'leagrave', 'luton', 'luton-airport',
+            'harpenden', 'st-albans-city', 'radlett', 'elstree-borehamwood',
+            'mill-hill-broadway', 'hendon', 'cricklewood', 'west-hampstead',
+            'kentish-town', 'kings-cross', 'farringdon-tl', 'city-thameslink',
+            'blackfriars', 'london-bridge',
+        ].map(id => byId.get(id)!);
 
-        return segments;
+        // c2c main line: Stratford → West Ham → Barking → Dagenham Dock → Rainham → Purfleet → Chafford Hundred → Grays
+        const c2cMain: [number, number][] = [
+            'stratford-tl', 'west-ham', 'barking', 'dagenham-dock',
+            'rainham-tl', 'purfleet', 'chafford-hundred', 'grays',
+        ].map(id => byId.get(id)!);
+
+        // c2c/District branch: Barking → Elm Park → Hornchurch → Upminster Bridge → Upminster
+        const upminterBranch: [number, number][] = [
+            'barking', 'elm-park', 'hornchurch', 'upminster-bridge', 'upminster',
+        ].map(id => byId.get(id)!);
+
+        // c2c Ockendon loop: Upminster → Ockendon → Chafford Hundred
+        const ockendonLoop: [number, number][] = [
+            'upminster', 'ockendon', 'chafford-hundred',
+        ].map(id => byId.get(id)!);
+
+        // Overground Romford–Upminster branch: Emerson Park → Upminster
+        const emersonPark: [number, number][] = [
+            'emerson-park', 'upminster',
+        ].map(id => byId.get(id)!);
+
+        return { northSouth, c2cMain, upminterBranch, ockendonLoop, emersonPark };
     };
 
-    const lineCoordinates = createLineSegments();
-    const thameslinkCoordinates = createThameslinkLineSegments();
+    const { mainLine: elizabethMain, abbeyWoodBranch: elizabethAbbeyWood } = createElizabethLineSegments();
+    const { northSouth, c2cMain, upminterBranch, ockendonLoop, emersonPark } = createThameslinkLineSegments();
 
     return (
         <div ref={containerRef} style={{ height: '100vh', width: '100vw', position: 'relative' }}>
@@ -174,9 +208,9 @@ const LondonRailMap: React.FC = () => {
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
 
-                {/* Elizabeth Line route */}
+                {/* Elizabeth Line main route: Reading → Whitechapel → Stratford → Shenfield */}
                 <Polyline
-                    positions={lineCoordinates}
+                    positions={elizabethMain}
                     pathOptions={{
                         color: '#663399',
                         weight: 6,
@@ -186,17 +220,38 @@ const LondonRailMap: React.FC = () => {
                     }}
                 />
 
-                {/* Thameslink route */}
+                {/* Elizabeth Line Abbey Wood branch: Whitechapel → Canary Wharf → Abbey Wood */}
                 <Polyline
-                    positions={thameslinkCoordinates}
+                    positions={elizabethAbbeyWood}
                     pathOptions={{
-                        color: '#008B8B',
-                        weight: 5,
+                        color: '#663399',
+                        weight: 6,
                         opacity: 0.8,
                         lineCap: 'round',
                         lineJoin: 'round',
                     }}
                 />
+
+                {/* Thameslink / c2c routes (multiple branches) */}
+                {([
+                    ['tl-north-south', northSouth],
+                    ['tl-c2c-main', c2cMain],
+                    ['tl-upminster-branch', upminterBranch],
+                    ['tl-ockendon-loop', ockendonLoop],
+                    ['tl-emerson-park', emersonPark],
+                ] as [string, [number, number][]][]).map(([key, segment]) => (
+                    <Polyline
+                        key={key}
+                        positions={segment}
+                        pathOptions={{
+                            color: '#008B8B',
+                            weight: 5,
+                            opacity: 0.8,
+                            lineCap: 'round',
+                            lineJoin: 'round',
+                        }}
+                    />
+                ))}
 
                 {/* 1-mile radius circles around each Elizabeth Line station */}
                 {elizabethLineStations.map((station) => (
