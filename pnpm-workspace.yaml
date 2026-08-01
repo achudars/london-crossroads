@@ -5,3 +5,5 @@ allowBuilds:
   '@img/sharp-win32-x64': true
   sharp: true
   unrs-resolver: true
+minimumReleaseAgeExclude:
+  - '@types/leaflet@1.9.22'
